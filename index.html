@@ -84,7 +84,7 @@ h1{font-size:30px}
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.8x;
+  background:rgba(0,0,0,.8);
   display:none;
   justify-content:center;
   align-items:center;
@@ -140,6 +140,42 @@ h1{font-size:30px}
   font-size:16px;
   cursor:pointer;
 }
+/* ---------- FPS upgrade ---------- */
+.game{
+  touch-action: none;
+}
+.target{
+  position:absolute;
+  font-size:34px;
+  user-select:none;
+  transition:transform .15s;
+}
+.target.hit{
+  transform:scale(1.4);
+}
+.flash{
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,.25);
+  animation:flash .1s;
+  pointer-events:none;
+}
+@keyframes flash{
+  from{opacity:1}to{opacity:0}
+}
+
+.reward-card{
+  background:#fff;
+  color:#b8001f;
+  padding:24px;
+  border-radius:20px;
+  animation:pop .6s;
+}
+@keyframes pop{
+  from{transform:scale(.7);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
 </style>
 </head>
 
@@ -148,6 +184,8 @@ h1{font-size:30px}
 <!-- Audio -->
 <audio id="openSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_9c8b2a9f6f.mp3"></audio>
 <audio id="bgm" src="https://cdn.pixabay.com/audio/2022/10/09/audio_5f8c3e5f27.mp3" loop></audio>
+<audio id="hitSound" src="https://cdn.pixabay.com/audio/2022/03/10/audio_6d3b7c6a8a.mp3"></audio>
+<audio id="missSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_3a0c9e56e5.mp3"></audio>
 
 <!-- SECTION 1 -->
 <div class="screen active" id="s1">
@@ -189,3 +227,228 @@ h1{font-size:30px}
 
 <!-- GAME -->
 <div class="screen" id="game">
+  <div class="game">
+    <div class="hud">
+      <div id="score">💘 SCORE: 0</div>
+      <div id="time">⏰ TIME: 30</div>
+    </div>
+    <div class="crosshair">➕</div>
+  </div>
+  <button class="btn" onclick="exitGame()">ออกเกม</button>
+</div>
+
+<!-- FAIL -->
+<div class="screen" id="fail">
+  <h2>แพ้แล้วนะ 😏</h2>
+  <p>แพ้เกม แต่ห้ามแพ้ใจ ❤️</p>
+  <button class="btn" onclick="startGame()">ขอแก้ตัว 😤</button>
+  <button class="btn" onclick="go('reward')">ยอมแล้วก็ได้ 😳</button>
+</div>
+
+<!-- REWARD -->
+<div class="screen" id="reward">
+  <div class="reward-card">
+    <h2>🎁 รางวัลของเธอ</h2>
+    <p id="rewardText"></p>
+    <button class="btn" onclick="saveReward()">บันทึกรางวัลนี้ 💖</button>
+  </div>
+</div>
+
+<script>
+/* ---------- Screen control ---------- */
+const screens = document.querySelectorAll(".screen");
+
+function go(id){
+  screens.forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* ---------- Envelope ---------- */
+function openEnvelope(){
+  const openSound = document.getElementById("openSound");
+  const bgm = document.getElementById("bgm");
+
+  openSound.currentTime = 0;
+  openSound.play();
+
+  bgm.volume = 0.5;
+  bgm.play();
+
+  go("s2");
+}
+
+/* ---------- Letter ---------- */
+function openLetter(){
+  go("letter");
+  typeText();
+}
+
+/* ---------- Images ---------- */
+function openImages(){
+  go("images");
+}
+
+function zoom(src){
+  document.getElementById("modalImg").src = src;
+  document.getElementById("modal").style.display = "flex";
+}
+
+/* ---------- Typing Effect ---------- */
+const text = `วาเลนไทน์ครั้งแรกของเรา
+เค้าอยากให้วันนี้เป็นวันที่เธอยิ้มได้
+และรู้ว่า…
+เค้าอยู่ข้างๆ เสมอ ❤️`;
+
+let i = 0;
+let typingTimer;
+
+function typeText(){
+  const el = document.getElementById("typing");
+  el.innerHTML = "";
+  i = 0;
+
+  clearInterval(typingTimer);
+  typingTimer = setInterval(()=>{
+    el.innerHTML += text.charAt(i);
+    i++;
+    if(i >= text.length){
+      clearInterval(typingTimer);
+    }
+  }, 40);
+}
+/* ---------- FPS GAME ---------- */
+let score = 0;
+let timeLeft = 30;
+let gameTimer;
+let spawnTimer;
+
+const gameBox = document.querySelector(".game");
+const scoreEl = document.getElementById("score");
+const timeEl = document.getElementById("time");
+
+function startGame(){
+  go("game");
+  score = 0;
+  timeLeft = 30;
+  scoreEl.innerText = "💘 SCORE: 0";
+  timeEl.innerText = "⏰ TIME: 30";
+  const flash = document.createElement("div");
+  flash.className = "flash";
+  gameBox.appendChild(flash);
+  setTimeout(()=>flash.remove(),100);
+  startTimer();
+  spawnTarget();
+}
+
+function startTimer(){
+  clearInterval(gameTimer);
+  gameTimer = setInterval(()=>{
+    timeLeft--;
+    timeEl.innerText = `⏰ TIME: ${timeLeft}`;
+    if(timeLeft <= 0){
+      endGame();
+    }
+  },1000);
+}
+
+function spawnTarget(){
+  clearInterval(spawnTimer);
+  spawnTimer = setInterval(()=>{
+    const t = document.createElement("div");
+    t.className = "target";
+    t.innerText = Math.random() > .3 ? "💘" : "🧸";
+    t.style.left = Math.random()*80 + "%";
+    t.style.top = Math.random()*80 + "%";
+
+    t.onclick = e =>{
+      e.stopPropagation();
+      hit(t);
+    };
+
+    gameBox.appendChild(t);
+
+    setTimeout(()=>t.remove(),1200);
+  },700);
+}
+
+function hit(t){
+  const hitSound = document.getElementById("hitSound");
+  hitSound.currentTime = 0;
+  hitSound.play();
+
+  t.classList.add("hit");
+
+  score += t.innerText === "🧸" ? 20 : 10;
+  scoreEl.innerText = `💘 SCORE: ${score}`;
+
+  setTimeout(()=>t.remove(),100);
+
+  if(score >= 100){
+    winGame();
+  }
+}
+
+gameBox.addEventListener("click", ()=>{
+  const miss = document.getElementById("missSound");
+  miss.currentTime = 0;
+  miss.play();
+});
+
+function endGame(){
+  clearInterval(gameTimer);
+  clearInterval(spawnTimer);
+  go("fail");
+}
+
+function winGame(){
+  clearInterval(gameTimer);
+  clearInterval(spawnTimer);
+  go("reward");
+  showReward();
+}
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+const rewards = [
+  "🎧 โทรคุยได้นานพิเศษ ห้ามวางสายก่อน",
+  "💌 สั่งให้ส่งข้อความหวานได้ 1 ครั้ง",
+  "😈 สั่งเค้าได้ 1 อย่าง",
+  "🌙 คืนนี้ต้องคอลจนเธอหลับ",
+  "🎁 จะมีของขวัญไปหาแน่นอน"
+];
+
+function showReward(){
+  document.getElementById("rewardText").innerText =
+    rewards[Math.floor(Math.random()*rewards.length)];
+}
+
+function saveReward(){
+  html2canvas(document.querySelector(".reward-card")).then(canvas=>{
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL();
+    a.download = "valentine-reward.png";
+    a.click();
+  });
+}
+
+function exitGame(){
+  clearInterval(gameTimer);
+  clearInterval(spawnTimer);
+
+  document.querySelectorAll(".target").forEach(t => t.remove());
+
+  const bgm = document.getElementById("bgm");
+  bgm.pause();
+  bgm.currentTime = 0;
+
+  go("s2");
+}
+
+</script>
+
+
+</body>
+</html>
+
+
