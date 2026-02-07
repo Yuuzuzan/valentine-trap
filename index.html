@@ -1,242 +1,247 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Valentine Trap 😈❤️</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine’s First Time 💌</title>
 
 <style>
-:root{
-  --pink:#ffd6e8;
-  --red:#ff6b81;
-  --purple:#8e44ad;
-  --bg:#fff0f6;
-}
-
-*{
-  box-sizing:border-box;
-  font-family: "Prompt", system-ui, sans-serif;
-}
-
+*{box-sizing:border-box;font-family:"Prompt",system-ui,sans-serif}
 body{
   margin:0;
-  min-height:100vh;
+  background:#c40018;
+  color:#fff;
   overflow:hidden;
-  color:#4a0033;
-
-  background-image: url("bg-valentine.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
-
-/* ---------- Layout ---------- */
 .screen{
   display:none;
-  padding:24px;
-  text-align:center;
   min-height:100vh;
+  padding:20px;
   justify-content:center;
   align-items:center;
+  text-align:center;
   flex-direction:column;
-  background: rgba(255,255,255,0.75);
-  backdrop-filter: blur(4px);
-  border-radius:20px;
 }
-.screen.active{ display:flex; }
+.active{display:flex}
 
-h1,h2{ margin-bottom:12px; }
-p{ line-height:1.6; }
+/* ---------- Opening ---------- */
+h1{font-size:32px;margin:10px 0}
+p{opacity:.9}
+
+.bear{
+  font-size:120px;
+  animation:bounce 1.6s infinite;
+}
+@keyframes bounce{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+}
+.envelope{
+  font-size:48px;
+  margin-top:10px;
+  cursor:pointer;
+  animation:wiggle 1.2s infinite;
+}
+@keyframes wiggle{
+  0%,100%{transform:rotate(0)}
+  50%{transform:rotate(5deg)}
+}
+
+/* ---------- Letter ---------- */
+.letter{
+  background:#fff6e5;
+  color:#5a2a2a;
+  padding:20px;
+  border-radius:20px;
+  max-width:420px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.slider{
+  display:flex;
+  overflow-x:auto;
+  gap:12px;
+  margin-bottom:12px;
+}
+.slider img{
+  width:120px;
+  border-radius:12px;
+}
+.typing{
+  min-height:120px;
+  text-align:left;
+  font-size:16px;
+}
 
 /* ---------- Buttons ---------- */
 .btn{
-  background:var(--red);
-  color:white;
+  margin-top:14px;
+  padding:12px 26px;
   border:none;
   border-radius:999px;
-  padding:14px 26px;
-  font-size:18px;
-  margin:8px;
+  background:#ff4d6d;
+  color:white;
+  font-size:16px;
   cursor:pointer;
-  transition:0.3s;
 }
 .btn.secondary{
   background:#fff;
-  color:var(--red);
-  border:2px solid var(--red);
-}
-.btn:active{ transform:scale(0.95); }
-
-/* ---------- Floating hearts ---------- */
-.heart{
-  position:absolute;
-  color:#ff7aa2;
-  animation: float 6s linear infinite;
-  opacity:0.7;
-}
-@keyframes float{
-  from{ transform:translateY(100vh); }
-  to{ transform:translateY(-10vh); }
+  color:#ff4d6d;
+  border:2px solid #ff4d6d;
 }
 
-/* ---------- Mini game ---------- */
-.game-area{
+/* ---------- Game ---------- */
+.game{
   position:relative;
   width:100%;
-  height:60vh;
   max-width:420px;
-  margin:auto;
+  height:70vh;
+  background:#ffdbe5;
+  border-radius:20px;
   overflow:hidden;
+  color:#a3002f;
 }
-
-/* heart game */
-.catch-heart{
+.target{
   position:absolute;
-  font-size:32px;
+  font-size:40px;
   cursor:pointer;
-  transition:0.2s;
+}
+.hud{
+  position:absolute;
+  top:10px;
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  padding:0 14px;
+  font-weight:bold;
+}
+.crosshair{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:24px;
+  pointer-events:none;
 }
 
-/* final */
-.fade{
-  animation:fadeIn 1.2s forwards;
+/* ---------- Result ---------- */
+.card{
+  background:white;
+  color:#5a2a2a;
+  padding:24px;
+  border-radius:20px;
+  max-width:380px;
 }
-@keyframes fadeIn{
-  from{ opacity:0; }
-  to{ opacity:1; }
-}
+.blur{filter:blur(4px)}
 </style>
 </head>
 
 <body>
 
-<!-- Floating hearts -->
-<script>
-for(let i=0;i<15;i++){
-  const h=document.createElement("div");
-  h.className="heart";
-  h.innerText="❤️";
-  h.style.left=Math.random()*100+"vw";
-  h.style.animationDuration=4+Math.random()*4+"s";
-  h.style.fontSize=16+Math.random()*24+"px";
-  document.body.appendChild(h);
-}
-</script>
-
-<!-- Screen 1 -->
-<div class="screen active" id="screen1">
-  <h1>เว็บนี้มีทางออกแค่ทางเดียว</h1>
-  <p>คือเล่นให้จบ 😈</p>
-  <button class="btn secondary" id="escapeBtn">ไม่เล่นได้ไหม</button>
-  <button class="btn" onclick="go(2)">เล่นก็ได้</button>
+<!-- SECTION 1 -->
+<div class="screen active" id="s1">
+  <h1>Valentine’s Day ครั้งแรกของเรา</h1>
+  <p>มีบางอย่างอยากให้เธอเปิดดู 💌</p>
+  <div class="bear">🐻</div>
+  <div class="envelope" onclick="go(2)">✉️</div>
+  <small>กดเปิดจดหมาย</small>
 </div>
 
-<!-- Screen 2 -->
-<div class="screen" id="screen2">
-  <h2>รักเค้ามั้ย?</h2>
-  <button class="btn" onclick="go(3)">รัก</button>
-  <button class="btn secondary" id="noLove">ไม่รัก</button>
-  <p id="tease" style="display:none;margin-top:12px;">
-    พยายามมาก แต่ก็ยังรักอยู่ดี 💕
-  </p>
-</div>
-
-<!-- Screen 3 -->
-<div class="screen" id="screen3">
-  <h2>จับหัวใจให้ครบ 3 ดวง 💘</h2>
-  <p id="timer">เวลา: 10</p>
-  <div class="game-area" id="heartArea"></div>
-</div>
-
-<!-- Screen 4 -->
-<div class="screen" id="screen4">
-  <h2>จะอยู่กับเค้านานแค่ไหน?</h2>
-  <button class="btn secondary" onclick="alert('กลับไปคิดใหม่ 😜')">ไม่นาน</button>
-  <button class="btn secondary" onclick="this.style.display='none'">ก็เรื่อยๆ</button>
-  <button class="btn" onclick="go(5)">ตลอดไป</button>
-</div>
-
-<!-- Final -->
-<div class="screen" id="screen5">
-  <div class="fade">
-    <p>จริงๆ แล้ว…</p>
-    <p>เว็บนี้ไม่ได้ตั้งใจแกล้งอย่างเดียว</p>
-    <p>แค่อยากบอกว่า…</p>
-    <h2>เค้ารักเธอมากนะ ❤️</h2>
-    <p>ขอบคุณที่อยู่ด้วยกันเสมอ</p>
-    <button class="btn" onclick="final()">รับความรักนี้ 💝</button>
+<!-- SECTION 3 -->
+<div class="screen" id="s2">
+  <div class="letter">
+    <div class="slider">
+      <img src="https://via.placeholder.com/120">
+      <img src="https://via.placeholder.com/120">
+      <img src="https://via.placeholder.com/120">
+    </div>
+    <p><b>ทุกภาพมีเธออยู่ในนั้น 💕</b></p>
+    <div class="typing" id="typing"></div>
+    <button class="btn" onclick="go(3)">ใช้ตั๋วนี้ ➜ 🎟️</button>
   </div>
 </div>
 
-<!-- End -->
-<div class="screen" id="screen6">
-  <h1>สุขสันต์วันวาเลนไทน์นะคนเก่ง 🌹</h1>
-  <button class="btn secondary" onclick="location.reload()">
-    เล่นใหม่ (โดนแกล้งอีกรอบ 😈)
-  </button>
+<!-- SECTION 4 GAME -->
+<div class="screen" id="s3">
+  <div class="game" id="game">
+    <div class="hud">
+      <div>💘 SCORE: <span id="score">0</span></div>
+      <div>⏰ <span id="time">30</span>s</div>
+    </div>
+    <div class="crosshair">💖</div>
+  </div>
+</div>
+
+<!-- SECTION WIN -->
+<div class="screen" id="win">
+  <div class="card">
+    <h2>🎉 ชนะแล้ว!</h2>
+    <p>Night Talk Reward 🌙</p>
+    <p>คืนนี้ต้องคอลจนเธอหลับ</p>
+    <button class="btn">บันทึกรางวัลนี้ 💖</button>
+  </div>
+</div>
+
+<!-- SECTION FAIL -->
+<div class="screen" id="fail">
+  <div class="card">
+    <h2>แพ้แล้วนะ 😏</h2>
+    <p>แพ้เกม แต่ห้ามแพ้ใจ ❤️</p>
+    <button class="btn secondary" onclick="location.reload()">ขอแก้ตัว 😤</button>
+  </div>
 </div>
 
 <script>
 function go(n){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById("screen"+n).classList.add("active");
+  document.getElementById("s"+n)?.classList.add("active");
+  document.getElementById(n==="win"?"win":"")?.classList.add("active");
 }
 
-/* escape button */
-const escape=document.getElementById("escapeBtn");
-escape.addEventListener("mouseover",()=>{
-  escape.style.position="absolute";
-  escape.style.left=Math.random()*70+"%";
-  escape.style.top=Math.random()*70+"%";
-});
+/* typing */
+const text = "วาเลนไทน์ครั้งแรกของเรา\nเค้าอยากให้วันนี้เป็นวันที่เธอยิ้มได้\nและรู้ว่า…\nเค้าอยู่ข้างๆ เสมอ ❤️";
+let i=0;
+function type(){
+  if(i<text.length){
+    document.getElementById("typing").innerHTML+=
+      text[i]==="\n"?"<br>":text[i];
+    i++; setTimeout(type,40);
+  }
+}
+type();
 
-/* no love button */
-let tries=0;
-const noLove=document.getElementById("noLove");
-noLove.addEventListener("mouseover",()=>{
-  tries++;
-  noLove.style.position="absolute";
-  noLove.style.left=Math.random()*70+"%";
-  noLove.style.top=Math.random()*70+"%";
-  if(tries>4) document.getElementById("tease").style.display="block";
-});
-
-/* heart game */
-let count=0,time=10;
-const area=document.getElementById("heartArea");
-
+/* game */
+let score=0,time=30;
+const game=document.getElementById("game");
 function spawn(){
-  const h=document.createElement("div");
-  h.className="catch-heart";
-  h.innerText="❤️";
-  h.style.left=Math.random()*85+"%";
-  h.style.top=Math.random()*85+"%";
-  h.onclick=()=>{
-    h.remove();
-    count++;
-    if(count>=3) go(4);
+  const t=document.createElement("div");
+  t.className="target";
+  t.innerText=Math.random()>.5?"💘":"🐻";
+  t.style.left=Math.random()*80+"%";
+  t.style.top=Math.random()*80+"%";
+  t.onclick=()=>{
+    score+=10;
+    document.getElementById("score").innerText=score;
+    t.remove();
   };
-  area.appendChild(h);
+  game.appendChild(t);
 }
+for(let i=0;i<5;i++) spawn();
 
-for(let i=0;i<3;i++) spawn();
-
-const interval=setInterval(()=>{
+const timer=setInterval(()=>{
   time--;
-  document.getElementById("timer").innerText="เวลา: "+time;
+  document.getElementById("time").innerText=time;
   if(time<=0){
-    clearInterval(interval);
-    alert("ช้าแบบนี้…รักเค้าจริงป่าวเนี่ย 😏");
-    location.reload();
+    clearInterval(timer);
+    if(score>=100){
+      document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+      document.getElementById("win").classList.add("active");
+    }else{
+      document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+      document.getElementById("fail").classList.add("active");
+    }
   }
 },1000);
-
-function final(){
-  alert("💥💖💥");
-  go(6);
-}
 </script>
 
 </body>
-
 </html>
