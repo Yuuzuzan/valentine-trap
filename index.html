@@ -259,7 +259,7 @@ h1{font-size:30px}
 <div class="screen" id="landing">
 
   <!-- 📜 LETTER (fold–open) -->
-  <div class="letter fold reveal" onclick="toggleLetter()">
+  <div class="letter open reveal">
     <div class="letter-cover">📜 กดเพื่อเปิดจดหมาย</div>
     <div class="typing" id="typing"></div>
   </div>
@@ -491,21 +491,10 @@ function openEnvelope(){
   bgm.play();
 
   go("landing");
-  revealNow();
-}
 
-/* ---------- LETTER TOGGLE ---------- */
-let letterOpened = false;
-
-function toggleLetter(){
-  if(letterOpened) return;
-
-  const letter = document.querySelector(".letter");
-  letter.classList.remove("fold");
-  letter.classList.add("open");
+  // ⭐ เพิ่ม 2 บรรทัดนี้
   typeText();
-
-  letterOpened = true;
+  revealNow();
 }
 
 /* ---------- SCROLL REVEAL ---------- */
@@ -531,6 +520,7 @@ function revealNow(){
 
 </body>
 </html>
+
 
 
 
