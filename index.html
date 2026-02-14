@@ -320,7 +320,7 @@ h1{font-size:30px}
 <div class="screen" id="landing">
 
   <!-- 📜 LETTER (fold–open) -->
-  <div class="letter open reveal">
+  <div class="letter fold reveal" id="letter">
     <div class="letter-cover">📜 กดเพื่อเปิดจดหมาย</div>
     <div class="typing" id="typing"></div>
   </div>
@@ -432,6 +432,13 @@ function typeText(){
     }
   }, 40);
 }
+
+  const letterEl = document.getElementById("letter");
+let letterOpened = false;
+
+letterEl.addEventListener("click", ()=>{
+  ...
+});
 
 /* ---------- FPS GAME ---------- */
 let score = 0;
@@ -559,7 +566,7 @@ function hit(t, e){
 }
 
 gameBox.addEventListener("click", ()=>{
-  score -= 5;
+  score = Math.max(0, score - 5);
   hitStreak = 0;
   scoreEl.innerText = `💘 SCORE: ${score}`;
 });
@@ -567,12 +574,14 @@ gameBox.addEventListener("click", ()=>{
 function endGame(){
   clearInterval(gameTimer);
   clearInterval(spawnTimer);
+  clearTargets(); // ⭐ เพิ่ม
   go("fail");
 }
 
 function winGame(){
   clearInterval(gameTimer);
   clearInterval(spawnTimer);
+  clearTargets(); // ⭐ เพิ่ม
   go("reward");
   showReward();
 }
@@ -606,13 +615,17 @@ function exitGame(){
   clearInterval(gameTimer);
   clearInterval(spawnTimer);
 
-  document.querySelectorAll(".target").forEach(t => t.remove());
+  clearTargets();
 
   const bgm = document.getElementById("bgm");
   bgm.pause();
   bgm.currentTime = 0;
 
   go("landing");
+}
+
+function clearTargets(){
+  document.querySelectorAll(".target, .boss").forEach(el => el.remove());
 }
 
   /* ---------- OPEN ENVELOPE ---------- */
@@ -656,6 +669,7 @@ function revealNow(){
 
 </body>
 </html>
+
 
 
 
