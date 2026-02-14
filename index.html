@@ -452,7 +452,9 @@ function startGame(){
   score = 0;
   level = 1;
   hitStreak = 0;
-  timeLeft = 45;              // ⭐ เพิ่มเวลา แต่ยากขึ้น
+  timeLeft = 45;
+  bossHP = 100;
+  bossActive = false;
   scoreEl.innerText = "💘 SCORE: 0";
   timeEl.innerText = "⏰ TIME: 45";
   startTimer();
@@ -471,6 +473,7 @@ function startTimer(){
     if(timeLeft <= 0 && bossHP > 0){
       endGame();
     }
+  },1000);
 }
 
 function spawnTarget(){
@@ -491,7 +494,7 @@ function spawnTarget(){
 
     t.onclick = e =>{
       e.stopPropagation();
-      hit(t);
+      hit(t, e);
     };
 
     gameBox.appendChild(t);
@@ -539,8 +542,10 @@ function hitBoss(boss){
   }
 }
 
-function hit(t){
-  const isHeadshot = event.target.classList.contains("head");
+function hit(t, e){
+  const isHeadshot =
+    e.target.classList.contains("head") ||
+    t.querySelector(".head").contains(e.target);
 
   score += isHeadshot ? 20 : 10;
   scoreEl.innerText = `💘 SCORE: ${score}`;
@@ -549,7 +554,6 @@ function hit(t){
   setTimeout(()=>t.remove(),100);
 
   if(score >= 150 && bossActive){
-    // ยังไม่ชนะ ต้องฆ่าบอส
     return;
   }
 }
@@ -652,6 +656,7 @@ function revealNow(){
 
 </body>
 </html>
+
 
 
 
