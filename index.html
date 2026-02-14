@@ -23,6 +23,12 @@ body{
   text-align:center;
   flex-direction:column;
 }
+/* ---------- FULLSCREEN GAME ---------- */
+#game{
+  padding:0;
+  justify-content:flex-start;
+}
+
 .screen.active{display:flex}
 
 /* ---------- Opening ---------- */
@@ -117,10 +123,7 @@ h1{font-size:30px}
 .game{
   position:relative;
   width:100%;
-  max-width:420px;
-  height:70vh;
   background:#ffdbe5;
-  border-radius:20px;
   overflow:hidden;
   color:#7a0020;
 }
@@ -138,13 +141,15 @@ h1{font-size:30px}
   pointer-events:none;
 }
 .hud{
-  position:absolute;
-  top:10px;
+  position:fixed;
+  top:14px;
+  left:0;
   width:100%;
   display:flex;
   justify-content:space-between;
-  padding:0 14px;
-  font-weight:bold;
+  padding:0 20px;
+  font-size:18px;
+  z-index:10;
 }
 
 /* ---------- Buttons ---------- */
@@ -168,6 +173,45 @@ h1{font-size:30px}
   user-select:none;
   transition:transform .15s;
 }
+/* ---------- BOSS ---------- */
+.boss{
+  font-size:80px;
+  position:absolute;
+  cursor:pointer;
+  user-select:none;
+  animation:bossFloat 2s infinite ease-in-out;
+}
+
+.boss .hp{
+  position:absolute;
+  bottom:-10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:80px;
+  height:8px;
+  background:#ffd1dc;
+  border-radius:6px;
+  overflow:hidden;
+}
+
+.boss .hp span{
+  display:block;
+  height:100%;
+  width:100%;
+  background:#ff2d55;
+  transition:width .3s;
+}
+
+.head{
+  font-size:28px;
+  line-height:1;
+}
+
+@keyframes bossFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+
 .target.hit{
   transform:scale(1.4);
 }
@@ -392,8 +436,12 @@ function typeText(){
 /* ---------- FPS GAME ---------- */
 let score = 0;
 let timeLeft = 30;
+let level = 1;
+let hitStreak = 0;
 let gameTimer;
 let spawnTimer;
+let bossHP = 100;
+let bossActive = false;
 
 const gameBox = document.querySelector(".game");
 const scoreEl = document.getElementById("score");
@@ -402,13 +450,11 @@ const timeEl = document.getElementById("time");
 function startGame(){
   go("game");
   score = 0;
-  timeLeft = 30;
+  level = 1;
+  hitStreak = 0;
+  timeLeft = 45;              // ⭐ เพิ่มเวลา แต่ยากขึ้น
   scoreEl.innerText = "💘 SCORE: 0";
-  timeEl.innerText = "⏰ TIME: 30";
-  const flash = document.createElement("div");
-  flash.className = "flash";
-  gameBox.appendChild(flash);
-  setTimeout(()=>flash.remove(),100);
+  timeEl.innerText = "⏰ TIME: 45";
   startTimer();
   spawnTarget();
 }
@@ -418,20 +464,30 @@ function startTimer(){
   gameTimer = setInterval(()=>{
     timeLeft--;
     timeEl.innerText = `⏰ TIME: ${timeLeft}`;
-    if(timeLeft <= 0){
+    if(timeLeft === 10 && !bossActive){
+      spawnBoss();
+    }
+
+    if(timeLeft <= 0 && bossHP > 0){
       endGame();
     }
-  },1000);
 }
 
 function spawnTarget(){
   clearInterval(spawnTimer);
+
   spawnTimer = setInterval(()=>{
     const t = document.createElement("div");
     t.className = "target";
-    t.innerText = Math.random() > .3 ? "💘" : "🧸";
-    t.style.left = Math.random()*80 + "%";
-    t.style.top = Math.random()*80 + "%";
+
+    // ⭐ โอกาสเป้าหลอกเพิ่ม
+    t.innerHTML = `<div class="head">💘</div>`;
+
+    const size = Math.max(26, 40 - level * 4);
+    t.style.fontSize = size + "px";
+
+    t.style.left = Math.random() * 90 + "%";
+    t.style.top = Math.random() * 90 + "%";
 
     t.onclick = e =>{
       e.stopPropagation();
@@ -440,31 +496,68 @@ function spawnTarget(){
 
     gameBox.appendChild(t);
 
-    setTimeout(()=>t.remove(),1200);
-  },700);
+    // ⭐ หายเร็วขึ้น
+    setTimeout(()=>t.remove(), Math.max(500, 1400 - level * 200));
+
+  }, Math.max(400, 900 - level * 120));
 }
 
-function hit(t){
-  const hitSound = document.getElementById("hitSound");
-  hitSound.currentTime = 0;
-  hitSound.play();
+function spawnBoss(){
+  bossActive = true;
 
-  t.classList.add("hit");
+  const boss = document.createElement("div");
+  boss.className = "boss";
+  boss.innerHTML = `
+    😈
+    <div class="hp"><span></span></div>
+  `;
 
-  score += t.innerText === "🧸" ? 20 : 10;
+  boss.style.left = "50%";
+  boss.style.top = "30%";
+  boss.style.transform = "translateX(-50%)";
+
+  boss.onclick = e=>{
+    e.stopPropagation();
+    hitBoss(boss);
+  };
+
+  gameBox.appendChild(boss);
+}
+
+function hitBoss(boss){
+  bossHP -= 10;
+  score += 15;
+
+  const bar = boss.querySelector(".hp span");
+  bar.style.width = bossHP + "%";
+
   scoreEl.innerText = `💘 SCORE: ${score}`;
 
-  setTimeout(()=>t.remove(),100);
-
-  if(score >= 100){
+  if(bossHP <= 0){
+    boss.remove();
     winGame();
   }
 }
 
+function hit(t){
+  const isHeadshot = event.target.classList.contains("head");
+
+  score += isHeadshot ? 20 : 10;
+  scoreEl.innerText = `💘 SCORE: ${score}`;
+
+  t.classList.add("hit");
+  setTimeout(()=>t.remove(),100);
+
+  if(score >= 150 && bossActive){
+    // ยังไม่ชนะ ต้องฆ่าบอส
+    return;
+  }
+}
+
 gameBox.addEventListener("click", ()=>{
-  const miss = document.getElementById("missSound");
-  miss.currentTime = 0;
-  miss.play();
+  score -= 5;
+  hitStreak = 0;
+  scoreEl.innerText = `💘 SCORE: ${score}`;
 });
 
 function endGame(){
@@ -559,6 +652,7 @@ function revealNow(){
 
 </body>
 </html>
+
 
 
 
