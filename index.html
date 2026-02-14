@@ -62,21 +62,35 @@ h1{font-size:30px}
   to{opacity:1;transform:translateY(0)}
 }
 
-/* ---------- Letter ---------- */
+/* ---------- LETTER BASE ---------- */
 .letter{
   background:#fff6e5;
   color:#5a2a2a;
-  padding:20px;
+  padding:28px 32px;
   border-radius:16px;
-  max-width:420px;
   box-shadow:0 10px 30px rgba(0,0,0,.25);
+
+  width:100%;
+  max-width:360px;              /* ⭐ เริ่มแคบ */
+  margin:0 auto;
+
+  transition:max-width 1.2s ease; /* ⭐ สำคัญ */
 }
+
+/* ---------- LETTER EXPAND STATES ---------- */
+.letter.expand-mid{
+  max-width:520px;
+}
+
+.letter.expand-full{
+  max-width:680px;
+}
+
 .typing{
-  min-height:120px;
-  text-align:left;
-  white-space:pre-line;   /* ⭐ สำคัญ */
-  line-height:1.8;        /* ⭐ ทำให้อ่านสบาย */
+  white-space:pre-line;
+  line-height:1.9;
   font-size:16px;
+  word-wrap:break-word;
 }
 
 /* ---------- Images ---------- */
@@ -346,18 +360,35 @@ let typingTimer;
 
 function typeText(){
   const el = document.getElementById("typing");
+  const letter = document.querySelector(".letter");
+
   el.innerHTML = "";
   i = 0;
+
+  // reset ขนาดก่อนพิมพ์
+  letter.classList.remove("expand-mid","expand-full");
 
   clearInterval(typingTimer);
   typingTimer = setInterval(()=>{
     el.innerHTML += text.charAt(i);
     i++;
+
+    const progress = i / text.length;
+
+    // ⭐ คุมการขยายตามความคืบหน้า
+    if(progress > 0.25){
+      letter.classList.add("expand-mid");
+    }
+    if(progress > 0.6){
+      letter.classList.add("expand-full");
+    }
+
     if(i >= text.length){
       clearInterval(typingTimer);
     }
   }, 40);
 }
+
 /* ---------- FPS GAME ---------- */
 let score = 0;
 let timeLeft = 30;
@@ -528,6 +559,7 @@ function revealNow(){
 
 </body>
 </html>
+
 
 
 
