@@ -11,7 +11,8 @@ body{
   margin:0;
   background:#b8001f;
   color:#fff;
-  overflow:hidden;
+  overflow-x:hidden;
+  overflow-y:auto;
 }
 .screen{
   display:none;
@@ -176,6 +177,64 @@ h1{font-size:30px}
   to{transform:scale(1);opacity:1}
 }
 
+/* ---------- LETTER FOLD ---------- */
+.letter{
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+  transition:all .6s ease;
+  max-height:70px;
+}
+
+.letter.fold{max-height:70px}
+.letter.open{max-height:420px}
+
+.letter-cover{
+  position:absolute;
+  inset:0;
+  background:#fff6e5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  border-radius:16px;
+  transition:opacity .4s;
+}
+
+.letter.open .letter-cover{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ---------- SCROLL REVEAL ---------- */
+.reveal{
+  opacity:0;
+  transform:translateY(40px);
+  transition:all .8s ease;
+}
+
+.reveal.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ---------- TICKET GLOW ---------- */
+.btn.ticket{
+  background:linear-gradient(135deg,#ff4d6d,#ff8fa3);
+  box-shadow:0 0 15px rgba(255,77,109,.8);
+  animation:float 2s infinite ease-in-out, glow 1.5s infinite alternate;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+
+@keyframes glow{
+  from{box-shadow:0 0 10px #ff4d6d}
+  to{box-shadow:0 0 25px #ff8fa3}
+}
+
 </style>
 </head>
 
@@ -196,29 +255,29 @@ h1{font-size:30px}
   <small>กดเปิดจดหมาย</small>
 </div>
 
-<!-- SECTION 2 -->
-<div class="screen" id="s2">
-  <div class="envelope-box">
-    <div class="item" onclick="openLetter()">📜 จดหมาย</div>
-    <div class="item" onclick="openImages()">📸 รูปของเรา</div>
-    <div class="item" onclick="startGame()">🎟️ ตั๋วพิเศษ</div>
-  </div>
-</div>
+<!-- LANDING PAGE -->
+<div class="screen" id="landing">
 
-<!-- LETTER -->
-<div class="screen" id="letter">
-  <div class="letter">
+  <!-- 📜 LETTER (fold–open) -->
+  <div class="letter fold reveal" onclick="toggleLetter()">
+    <div class="letter-cover">📜 กดเพื่อเปิดจดหมาย</div>
     <div class="typing" id="typing"></div>
-    <button class="btn" onclick="go('s2')">กลับ</button>
   </div>
-</div>
 
-<!-- IMAGES -->
-<div class="screen" id="images">
-  <img class="thumb" src="https://via.placeholder.com/300" onclick="zoom(this.src)">
-  <img class="thumb" src="https://via.placeholder.com/300" onclick="zoom(this.src)">
-  <img class="thumb" src="https://via.placeholder.com/300" onclick="zoom(this.src)">
-  <button class="btn" onclick="go('s2')">กลับ</button>
+  <!-- 📸 IMAGES -->
+  <div class="reveal" style="margin:30px 0">
+    <img class="thumb" src="https://via.placeholder.com/300" onclick="zoom(this.src)">
+    <img class="thumb" src="https://via.placeholder.com/300" onclick="zoom(this.src)">
+    <img class="thumb" src="https://via.placeholder.com/300" onclick="zoom(this.src)">
+  </div>
+
+  <!-- 🎟️ GAME TICKET -->
+  <div class="reveal">
+    <button class="btn ticket" onclick="startGame()">
+      🎟️ ตั๋วพิเศษ เข้าเล่นเกม
+    </button>
+  </div>
+
 </div>
 
 <div class="modal" id="modal" onclick="this.style.display='none'">
@@ -261,31 +320,6 @@ const screens = document.querySelectorAll(".screen");
 function go(id){
   screens.forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-}
-
-/* ---------- Envelope ---------- */
-function openEnvelope(){
-  const openSound = document.getElementById("openSound");
-  const bgm = document.getElementById("bgm");
-
-  openSound.currentTime = 0;
-  openSound.play();
-
-  bgm.volume = 0.5;
-  bgm.play();
-
-  go("s2");
-}
-
-/* ---------- Letter ---------- */
-function openLetter(){
-  go("letter");
-  typeText();
-}
-
-/* ---------- Images ---------- */
-function openImages(){
-  go("images");
 }
 
 function zoom(src){
@@ -442,7 +476,54 @@ function exitGame(){
   bgm.pause();
   bgm.currentTime = 0;
 
-  go("s2");
+  go("landing");
+}
+
+  /* ---------- OPEN ENVELOPE ---------- */
+function openEnvelope(){
+  const openSound = document.getElementById("openSound");
+  const bgm = document.getElementById("bgm");
+
+  openSound.currentTime = 0;
+  openSound.play();
+
+  bgm.volume = 0.5;
+  bgm.play();
+
+  go("landing");
+  revealNow();
+}
+
+/* ---------- LETTER TOGGLE ---------- */
+let letterOpened = false;
+
+function toggleLetter(){
+  if(letterOpened) return;
+
+  const letter = document.querySelector(".letter");
+  letter.classList.remove("fold");
+  letter.classList.add("open");
+  typeText();
+
+  letterOpened = true;
+}
+
+/* ---------- SCROLL REVEAL ---------- */
+const reveals = document.querySelectorAll(".reveal");
+
+window.addEventListener("scroll", ()=>{
+  reveals.forEach(el=>{
+    const top = el.getBoundingClientRect().top;
+    if(top < window.innerHeight - 80){
+      el.classList.add("show");
+    }
+  });
+});
+
+function revealNow(){
+  document.querySelectorAll(".reveal").forEach(el=>{
+    el.classList.add("show");
+  });
 }
 
 </script>
@@ -450,5 +531,6 @@ function exitGame(){
 
 </body>
 </html>
+
 
 
